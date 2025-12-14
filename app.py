@@ -1,6 +1,9 @@
 import streamlit as st
 import re
 import matplotlib.pyplot as plt
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+import io
 
 # =============================
 # DATA KAMUS PENILAIAN
@@ -45,6 +48,9 @@ solution_suggestion = {
 if "counter" not in st.session_state:
     st.session_state.counter = {v: 0 for v in rating_category.values()}
 
+if "last_result" not in st.session_state:
+    st.session_state.last_result = None
+
 # =============================
 # FUNGSI ANALISIS
 # =============================
@@ -71,7 +77,24 @@ def analyze_food(text):
     return rating, complaints
 
 # =============================
-# TAMPILAN WEB
+# FUNGSI BUAT PDF
+# =============================
+def create_pdf(result_text):
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    text_obj = c.beginText(40, 800)
+
+    for line in result_text.split("\n"):
+        text_obj.textLine(line)
+
+    c.drawText(text_obj)
+    c.showPage()
+    c.save()
+    buffer.seek(0)
+    return buffer
+
+# =============================
+# UI STREAMLIT
 # =============================
 st.set_page_config(
     page_title="Evaluasi Harga Kantin ITPA",
@@ -79,9 +102,8 @@ st.set_page_config(
 )
 
 st.title("📊 Evaluasi Opini Mahasiswa Tentang Harga Makanan di Kantin ITPA")
-st.write("Masukkan opini mahasiswa mengenai harga makanan di kantin.")
 
-text = st.text_area("✍ Masukkan Opini")
+text = st.text_area("✍ Masukkan Opini Mahasiswa")
 
 # =============================
 # PROSES OPINI
@@ -100,6 +122,16 @@ if st.button("🔍 Proses Opini"):
 
             keluhan_text = ", ".join(complaints) if complaints else "Tidak ada"
 
+            result_text = (
+                "HASIL EVALUASI OPINI HARGA MAKANAN DI KANTIN ITPA\n\n"
+                f"Rating   : {rating}\n"
+                f"Kategori : {category}\n"
+                f"Keluhan  : {keluhan_text}\n"
+                f"Saran    : {solution_suggestion[rating]}"
+            )
+
+            st.session_state.last_result = result_text
+
             st.success("✅ Hasil Evaluasi")
             st.write(f"*Rating :* {rating}")
             st.write(f"*Kategori :* {category}")
@@ -107,7 +139,20 @@ if st.button("🔍 Proses Opini"):
             st.write(f"*Saran :* {solution_suggestion[rating]}")
 
 # =============================
-# GRAFIK (OTOMATIS MUNCUL)
+# DOWNLOAD PDF
+# =============================
+if st.session_state.last_result:
+    pdf_buffer = create_pdf(st.session_state.last_result)
+
+    st.download_button(
+        label="⬇ Download PDF Hasil Evaluasi",
+        data=pdf_buffer,
+        file_name="hasil_evaluasi_kantin_ITPA.pdf",
+        mime="application/pdf"
+    )
+
+# =============================
+# GRAFIK (OTOMATIS)
 # =============================
 st.subheader("📈 Grafik Kepuasan Harga")
 
