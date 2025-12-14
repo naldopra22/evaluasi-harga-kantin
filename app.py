@@ -107,7 +107,7 @@ if st.button("🔍 Proses Opini"):
             st.write(f"*Saran :* {solution_suggestion[rating]}")
 
 # =============================
-# GRAFIK
+# GRAFIK (OTOMATIS MUNCUL)
 # =============================
 st.subheader("📈 Grafik Kepuasan Harga")
 
