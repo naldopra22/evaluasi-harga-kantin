@@ -77,41 +77,17 @@ def analyze_food(text):
     return rating, complaints
 
 # =============================
-# BUAT GRAFIK KE IMAGE
-# =============================
-def create_graph_image():
-    fig, ax = plt.subplots()
-    ax.bar(
-        st.session_state.counter.keys(),
-        st.session_state.counter.values()
-    )
-    ax.set_xlabel("Kategori")
-    ax.set_ylabel("Jumlah")
-    plt.xticks(rotation=20)
-
-    buf = io.BytesIO()
-    plt.savefig(buf, format="png", bbox_inches="tight")
-    plt.close(fig)
-    buf.seek(0)
-    return buf
-
-# =============================
-# BUAT PDF (TEKS + GRAFIK)
+# FUNGSI BUAT PDF
 # =============================
 def create_pdf(result_text):
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
-
-    # Judul & teks
     text_obj = c.beginText(40, 800)
+
     for line in result_text.split("\n"):
         text_obj.textLine(line)
+
     c.drawText(text_obj)
-
-    # Grafik
-    graph_img = create_graph_image()
-    c.drawImage(graph_img, 60, 250, width=480, height=280)
-
     c.showPage()
     c.save()
     buffer.seek(0)
@@ -147,8 +123,7 @@ if st.button("🔍 Proses Opini"):
             keluhan_text = ", ".join(complaints) if complaints else "Tidak ada"
 
             result_text = (
-                "HASIL EVALUASI OPINI HARGA MAKANAN\n"
-                "DI KANTIN ITPA\n\n"
+                "HASIL EVALUASI OPINI HARGA MAKANAN DI KANTIN ITPA\n\n"
                 f"Rating   : {rating}\n"
                 f"Kategori : {category}\n"
                 f"Keluhan  : {keluhan_text}\n"
@@ -170,14 +145,14 @@ if st.session_state.last_result:
     pdf_buffer = create_pdf(st.session_state.last_result)
 
     st.download_button(
-        label="⬇ Download PDF (Dengan Grafik)",
+        label="⬇ Download PDF Hasil Evaluasi",
         data=pdf_buffer,
         file_name="hasil_evaluasi_kantin_ITPA.pdf",
         mime="application/pdf"
     )
 
 # =============================
-# GRAFIK DI WEB (OTOMATIS)
+# GRAFIK (OTOMATIS)
 # =============================
 st.subheader("📈 Grafik Kepuasan Harga")
 
