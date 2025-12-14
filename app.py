@@ -79,7 +79,6 @@ st.set_page_config(
 )
 
 st.title("📊 Evaluasi Opini Mahasiswa Tentang Harga Makanan di Kantin ITPA")
-
 st.write("Masukkan opini mahasiswa mengenai harga makanan di kantin.")
 
 text = st.text_area("✍ Masukkan Opini")
@@ -99,11 +98,13 @@ if st.button("🔍 Proses Opini"):
             category = rating_category[rating]
             st.session_state.counter[category] += 1
 
+            keluhan_text = ", ".join(complaints) if complaints else "Tidak ada"
+
             st.success("✅ Hasil Evaluasi")
             st.write(f"*Rating :* {rating}")
             st.write(f"*Kategori :* {category}")
-            st.write("*Keluhan :*", complaints if complaints else "Tidak ada")
-            st.write("*Saran :*", solution_suggestion[rating])
+            st.write(f"*Keluhan :* {keluhan_text}")
+            st.write(f"*Saran :* {solution_suggestion[rating]}")
 
 # =============================
 # GRAFIK
